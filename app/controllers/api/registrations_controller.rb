@@ -2,12 +2,17 @@ class Api::RegistrationsController < ApplicationController
     skip_before_action :verify_authenticity_token
 
     def create
-        user = User.create(user_params)
-
-        if user.save
-            render json: { message: 'User Created Successfully' }, status: :created
+        if email_already_exists(user_params[:email])
+            render json: { message: 'Email already exists' }, status: unprocessable_entity
+            
         else
-            render json: { message: user.error.full_messages }, status: :unprocessable_entity
+            user = User.create(user_params)
+
+            if user.save
+                render json: { message: 'User Created Successfully' }, status: :created
+            else
+                render json: { message: user.error.full_messages }, status: :unprocessable_entity
+            end
         end
 
     end
